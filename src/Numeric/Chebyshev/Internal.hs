@@ -11,6 +11,7 @@ module Numeric.Chebyshev.Internal
     , absLargestCoefficient
     , lastCoefficientsAreNegligible
     , dropNegligible
+    , dropNegligibleToPowerOf2
     , padToLength
     , integral
 
@@ -134,6 +135,22 @@ lastCoefficientsAreNegligible k poly =
     cmax = absLargestCoefficient poly
     lastQuotients = [ cs V.! j | j <- [max 0 (n-k) .. n-1] ]
     isNegligible c = abs c / cmax <= 2*machineEps
+
+-- | Set negligible coefficients at the end to zero
+-- and pad to power of two.
+--
+-- TODO: Make more efficient by not generating an intermediate Vector.
+dropNegligibleToPowerOf2 :: Chebpoly -> Chebpoly
+dropNegligibleToPowerOf2 poly =
+    dropNegligible poly `padToLength` (nextPowerOf2 n)
+  where
+    n = numberOfCoefficients poly
+
+nextPowerOf2 :: Int -> Int
+nextPowerOf2 n = 2^(ceiling k)
+  where
+    k :: Double
+    k = log (fromIntegral n) / log 2
 
 -- | Drop coefficients from the end that are negligible.
 dropNegligible :: Chebpoly -> Chebpoly
