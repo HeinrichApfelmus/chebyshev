@@ -8,6 +8,8 @@ module Numeric.Chebyshev.Internal
     -- * Sum of Chebyshev polynomials
     , Chebpoly
     , numberOfCoefficients
+    , absLargestCoefficient
+    , dropNegligible
     , integral
 
     -- * Conversion
@@ -109,6 +111,22 @@ newtype Chebpoly = Chebpoly
 -- | Total number of coefficients stored for this polynomial.
 numberOfCoefficients :: Chebpoly -> Int
 numberOfCoefficients = V.length . coefficients
+
+-- | Magnitude of the coefficient with the largest magnitude.
+absLargestCoefficient :: Chebpoly -> Double
+absLargestCoefficient = V.foldl' combine 0 . coefficients
+  where
+    combine m c = m `max` abs c
+
+-- | Drop coefficients from the end that are negligible.
+dropNegligible :: Chebpoly -> Chebpoly
+dropNegligible poly
+    = Chebpoly
+    . V.reverse . V.dropWhile isNegligible . V.reverse
+    . coefficients $ poly
+  where
+    cmax = absLargestCoefficient poly
+    isNegligible c = abs c / cmax <= 2*machineEps
 
 -- | Definite integral of a polynomial over the interval [-1,1].
 integral :: Chebpoly -> Double
@@ -236,3 +254,8 @@ dist xs ys = V.sum $ V.zipWith (\x y -> abs (x-y)) xs ys
 -- | Approximate equality up to machine precision
 approx xs ys = dist xs ys / dist xs (V.map (const 0) ys) < eps
   where eps = 1e-15
+
+-- | Machine precision.
+-- TODO: FIXME!
+machineEps :: Double
+machineEps = 1e-15
