@@ -1,6 +1,7 @@
 module Numeric.Chebyshev
     ( -- * Chebfuns
       Chebfun (..)
+    , toChebfun
     , Warning (..)
     , getWarning
     , size
@@ -14,7 +15,6 @@ import Numeric.Chebyshev.Internal (Chebvals, Chebpoly)
 import qualified Numeric.Chebyshev.Internal as Core
 
 -- TODO:
--- * Construction of Chebyshev representation through recursive refinment.
 -- * Move norms of vectors to a separate module.
 
 {-----------------------------------------------------------------------------
@@ -54,6 +54,45 @@ data Warning
     -- ^ When computing the 'Chebfun' for a given function,
     -- the approximation algorithm did not converge.
     deriving (Eq, Show, Read)
+
+-- | Construct a 'Chebfun' by computing an approximating to a given
+-- real-valued function defined on the interval $[-1,1]$.
+--
+-- The algorithm is described in [1].
+--
+-- [1] Z. Battles and L. N. Trefethen, An Extension of MATLAB to Continuous Functions and Operators, SIAM J. Sci. Comput. 25, 1743 (2004).
+toChebfun :: (Double -> Double) -> Chebfun
+toChebfun f = approximate 2
+  where
+    approximate :: Int -> Chebfun
+    approximate level
+        | goodApproximation poly =
+            Chebfun poly Nothing
+        | level == 15 =
+            Chebfun
+                (Core.dropNegligibleToPowerOf2 poly)
+                (Just ConvergenceNotReached)
+            -- See Note [ApproximationSize]
+        | otherwise =
+            approximate (level+1)
+      where
+        n = 2^level
+        poly = Core.valsToPoly $ Core.sample n f
+
+    goodApproximation = Core.lastCoefficientsAreNegligible 2
+
+{- Note [ApproximationSize]
+
+Unlike Ref. [1], this algorithm keeps the number of coefficients
+at a power of two, and does not reduce the length of the coefficient Vector.
+However, the algorithm still sets many coefficients that are negligible
+to exact zero.
+
+We do this because the Fast Fourier Transform works best with a power of two
+-- and we would have to pad the Vector with zeroes every time that
+we wanted to evaluate the function at a point.
+
+-}
 
 {-----------------------------------------------------------------------------
     Operations
