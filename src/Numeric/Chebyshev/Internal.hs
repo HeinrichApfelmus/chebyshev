@@ -89,7 +89,8 @@ binarySearchReverse x xs = go 0 (n-1)
 {-----------------------------------------------------------------------------
     Chebyshev polynomials
 ------------------------------------------------------------------------------}
--- | A polynomial, given as a linear combination of Chebyshev polynomials.
+-- | A polynomial, represented as a linear combination of
+-- Chebyshev polynomials.
 --
 -- The $k$-the Chebyshev polynomial in the variable $x \in [-1,1]$
 -- is defined as
@@ -111,7 +112,7 @@ numberOfCoefficients = V.length . coefficients
 
 -- | Definite integral of a polynomial over the interval [-1,1].
 integral :: Chebpoly -> Double
-integral (Chebpoly cs) = sumMap (\j c -> c * integral j) cs
+integral = sumMap (\j c -> c * integral j) . coefficients
   where
     integral k = if odd k then 0 else 2/(1-fromIntegral k^2)
 

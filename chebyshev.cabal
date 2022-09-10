@@ -15,7 +15,7 @@ category:           Math, Numeric
 
 license:            BSD-3-Clause
 license-file:       LICENSE
-copyright:          (c) 2021 Heinrich Apfelmus
+copyright:          (c) 2021-2022 Heinrich Apfelmus
 author:             Heinrich Apfelmus
 maintainer:         apfelmus at quantentunnel dot de
 bug-reports:        https://github.com/HeinrichApfelmus/chebyshev
