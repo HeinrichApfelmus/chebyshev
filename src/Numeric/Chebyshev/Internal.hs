@@ -9,6 +9,7 @@ module Numeric.Chebyshev.Internal
     , Chebpoly
     , numberOfCoefficients
     , absLargestCoefficient
+    , lastCoefficientsAreNegligible
     , dropNegligible
     , integral
 
@@ -117,6 +118,21 @@ absLargestCoefficient :: Chebpoly -> Double
 absLargestCoefficient = V.foldl' combine 0 . coefficients
   where
     combine m c = m `max` abs c
+
+-- | 'lastCoefficientsAreNegligible k'
+-- checks whether the last 'k' coefficients are negligible.
+--
+-- A coefficient is considered to be negligible if it is smaller in magnitude
+-- than twice machine precision times the largest coefficient.
+lastCoefficientsAreNegligible :: Int -> Chebpoly -> Bool
+lastCoefficientsAreNegligible k poly =
+    all isNegligible lastQuotients
+  where
+    n = numberOfCoefficients poly
+    cs = coefficients poly
+    cmax = absLargestCoefficient poly
+    lastQuotients = [ cs V.! j | j <- [max 0 (n-k) .. n-1] ]
+    isNegligible c = abs c / cmax <= 2*machineEps
 
 -- | Drop coefficients from the end that are negligible.
 dropNegligible :: Chebpoly -> Chebpoly
