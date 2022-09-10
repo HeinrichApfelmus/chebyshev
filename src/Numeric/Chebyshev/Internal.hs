@@ -11,6 +11,7 @@ module Numeric.Chebyshev.Internal
     , absLargestCoefficient
     , lastCoefficientsAreNegligible
     , dropNegligible
+    , padToLength
     , integral
 
     -- * Conversion
@@ -143,6 +144,17 @@ dropNegligible poly
   where
     cmax = absLargestCoefficient poly
     isNegligible c = abs c / cmax <= 2*machineEps
+
+-- | Pad a 'Chebpoly' with zeros until there are at least @m@ coefficients.
+padToLength :: Chebpoly -> Int -> Chebpoly
+padToLength poly new
+    | new > n = Chebpoly $ V.generate new value
+    | otherwise = poly
+  where
+    n = numberOfCoefficients poly
+    value j
+        | j < n     = coefficients poly V.! j
+        | otherwise = 0
 
 -- | Definite integral of a polynomial over the interval [-1,1].
 integral :: Chebpoly -> Double
