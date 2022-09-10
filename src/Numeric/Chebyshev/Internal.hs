@@ -7,6 +7,7 @@ module Numeric.Chebyshev.Internal
 
     -- * Sum of Chebyshev polynomials
     , Chebpoly
+    , numberOfCoefficients
     , integral
 
     -- * Conversion
@@ -97,8 +98,16 @@ binarySearchReverse x xs = go 0 (n-1)
 --
 -- where $z = e^{iθ}$ for $x = \cos θ$. This function is, in fact,
 -- a polynomial in $x$.
-newtype Chebpoly = Chebpoly (Vector Double)
+newtype Chebpoly = Chebpoly
+    { coefficients :: Vector Double
+        -- ^ Vector of coefficients. (V.! k) gives the coefficient
+        -- in front of $T^k(x)$.
+    }
     deriving (Eq, Show)
+
+-- | Total number of coefficients stored for this polynomial.
+numberOfCoefficients :: Chebpoly -> Int
+numberOfCoefficients = V.length . coefficients
 
 -- | Definite integral of a polynomial over the interval [-1,1].
 integral :: Chebpoly -> Double
