@@ -5,6 +5,8 @@ module Numeric.Chebyshev
     , getWarning
     , size
 
+    , evaluate
+    , integral
     ) where
 
 import Numeric.Chebyshev.Internal (Chebvals, Chebpoly)
@@ -52,4 +54,19 @@ data Warning
     -- ^ When computing the 'Chebfun' for a given function,
     -- the approximation algorithm did not converge.
     deriving (Eq, Show, Read)
+
+{-----------------------------------------------------------------------------
+    Operations
+------------------------------------------------------------------------------}
+-- | Evaluate a 'Chebfun' at a point in the interval $[-1,1]$.
+--
+-- Algorithm complexity:
+-- $O(N \log N)$ for evaluation at the first point,
+-- $O(N)$ for evaluation at additional points.
+evaluate :: Chebfun -> (Double -> Double)
+evaluate = Core.interpolate . Core.polyToVals . chebpoly_
+
+-- | Definite integral of the 'Chebfun' over the interval $[-1,1]$.
+integral :: Chebfun -> Double
+integral = Core.integral . chebpoly_
 
