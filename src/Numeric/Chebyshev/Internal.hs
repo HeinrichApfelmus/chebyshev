@@ -1,6 +1,7 @@
 module Numeric.Chebyshev.Internal
     ( -- * Interpolation on Chebyshev points
       Chebvals
+    , getChebvals 
     , chebpoints
     , sample
     , interpolate

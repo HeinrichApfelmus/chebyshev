@@ -1,3 +1,5 @@
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Numeric.Chebyshev
     ( -- * Chebfuns
       Chebfun (..)
@@ -8,10 +10,17 @@ module Numeric.Chebyshev
 
     , evaluate
     , integral
+
+    -- * Plotting
+    , Plot (..)
+    , toPlot
+    , plotToFile
     ) where
 
 import Numeric.Chebyshev.Internal (Chebvals, Chebpoly)
 
+import qualified Data.Vector.Unboxed as V
+import qualified Graphics.Vega.VegaLite as G
 import qualified Numeric.Chebyshev.Internal as Core
 
 -- TODO:
@@ -109,3 +118,51 @@ evaluate = Core.interpolate . Core.polyToVals . chebpoly_
 integral :: Chebfun -> Double
 integral = Core.integral . chebpoly_
 
+{-----------------------------------------------------------------------------
+    Plotting
+------------------------------------------------------------------------------}
+plotToFile :: FilePath -> Chebfun -> IO ()
+plotToFile fpath fun = G.toHtmlFile fpath . G.toVegaLite $
+    [ enc []
+    , G.layer [ values, points ]
+    , G.height 300
+    , G.width 400
+    ]
+  where
+    enc = G.encoding
+        . G.position G.X [ G.PName "x", G.PmType G.Quantitative ]
+        . G.position G.Y [ G.PName "f(x)", G.PmType G.Quantitative ]
+    mkData xfs = G.dataFromColumns []
+        . G.dataColumn "x" (G.Numbers xs)
+        . G.dataColumn "f(x)" (G.Numbers fs)
+        $ []
+      where (xs, fs) = unzip xfs
+
+    values = G.asSpec
+        [ mkData values_
+        , G.mark G.Line []
+        ]
+    points = G.asSpec
+        [ mkData points_
+        , G.mark G.Circle []
+        ]
+
+    Plot{values_,points_} = toPlot fun
+
+data Plot = Plot
+    { values_ :: [(Double, Double)]
+        -- ^ 
+    , points_ :: [(Double,Double)]
+        -- ^ Chebyshev points on the curve
+        -- that are used for the approximation.
+    }
+
+-- | Plot a chebfun with corresponding interpolation points
+toPlot :: Chebfun -> Plot
+toPlot fun = Plot
+    { values_ = [ (x,f x) | x <- V.toList $ Core.chebpoints 1024 ]
+    , points_ = [ (x,f x) | x <- V.toList $ Core.chebpoints n ]
+    }
+  where
+    f = evaluate fun
+    n = size fun - 1
