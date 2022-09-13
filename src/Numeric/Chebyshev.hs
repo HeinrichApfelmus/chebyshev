@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Numeric.Chebyshev
     ( -- * Chebfuns
-      Chebfun (..)
+      Chebfun
     , toChebfun
     , Warning (..)
     , getWarning

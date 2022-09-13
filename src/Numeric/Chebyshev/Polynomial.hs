@@ -26,9 +26,14 @@ module Numeric.Chebyshev.Polynomial
     , prop_chebyshev
     ) where
 
-import Data.Maybe ( fromMaybe )
-import Data.Vector.Unboxed ( Vector, (!), Unbox )
-import Data.Complex ( Complex((:+)), realPart )
+import Data.Maybe
+    ( fromMaybe )
+import Data.Vector.Unboxed
+    ( Vector, (!), Unbox )
+import Data.Complex
+    ( Complex((:+)), realPart )
+import Numeric.Chebyshev.Util
+    ( approx, machineEpsilon, sumMap )
 
 import Numeric.Fourier
 
@@ -134,7 +139,7 @@ lastCoefficientsAreNegligible k poly =
     cs = coefficients poly
     cmax = absLargestCoefficient poly
     lastQuotients = [ cs V.! j | j <- [max 0 (n-k) .. n-1] ]
-    isNegligible c = abs c / cmax <= 2*machineEps
+    isNegligible c = abs c / cmax <= 2*machineEpsilon
 
 -- | Set negligible coefficients at the end to zero
 -- and pad to power of two.
@@ -160,7 +165,7 @@ dropNegligible poly
     . coefficients $ poly
   where
     cmax = absLargestCoefficient poly
-    isNegligible c = abs c / cmax <= 2*machineEps
+    isNegligible c = abs c / cmax <= 2*machineEpsilon
 
 -- | Pad a 'Chebpoly' with zeros until there are at least @m@ coefficients.
 padToLength :: Chebpoly -> Int -> Chebpoly
@@ -282,25 +287,3 @@ chebyshev k x = chebs !! k
   where
     chebs = 1 : x : zipWith (-) (map (2*x*) $ tail chebs) chebs
 
-{-----------------------------------------------------------------------------
-    Utilities
-------------------------------------------------------------------------------}
--- | Efficient implementation of
---
--- >  sumMap f = V.sum (V.imap f)
-sumMap :: (Int -> Double -> Double) -> Vector Double -> Double
-sumMap f = V.ifoldl' (\total j a -> total + f j a) 0
-{-# INLINE sumMap #-}
-
--- | L1 distance between two vectors.
-dist :: Vector Double -> Vector Double -> Double
-dist xs ys = V.sum $ V.zipWith (\x y -> abs (x-y)) xs ys
-
--- | Approximate equality up to machine precision
-approx xs ys = dist xs ys / dist xs (V.map (const 0) ys) < eps
-  where eps = 1e-15
-
--- | Machine precision.
--- TODO: FIXME!
-machineEps :: Double
-machineEps = 1e-15
