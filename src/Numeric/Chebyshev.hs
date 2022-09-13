@@ -17,11 +17,11 @@ module Numeric.Chebyshev
     , plotToFile
     ) where
 
-import Numeric.Chebyshev.Internal (Chebvals, Chebpoly)
+import Numeric.Chebyshev.Polynomial (Chebvals, Chebpoly)
 
 import qualified Data.Vector.Unboxed as V
 import qualified Graphics.Vega.VegaLite as G
-import qualified Numeric.Chebyshev.Internal as Core
+import qualified Numeric.Chebyshev.Polynomial as Core
 
 -- TODO:
 -- * Move norms of vectors to a separate module.

@@ -1,4 +1,4 @@
-module Numeric.Chebyshev.Internal
+module Numeric.Chebyshev.Polynomial
     ( -- * Interpolation on Chebyshev points
       Chebvals
     , getChebvals 
@@ -24,8 +24,7 @@ module Numeric.Chebyshev.Internal
     , prop_interpolate_on
     , prop_inverse
     , prop_chebyshev
-    )
-  where
+    ) where
 
 import Data.Maybe ( fromMaybe )
 import Data.Vector.Unboxed ( Vector, (!), Unbox )
