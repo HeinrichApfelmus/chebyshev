@@ -18,10 +18,10 @@ import qualified Data.Vector.Unboxed as V
     Numerical
 ------------------------------------------------------------------------------}
 
--- | Machine precision.
--- TODO: FIXME!
+-- | The machine epsilon is the smallest value @ε :: Double@ such that
+-- @1.0 :: Double@ and @(1.0 + ε) :: Double@ are distinct.
 machineEpsilon :: Double
-machineEpsilon = 1e-15
+machineEpsilon = let eps = encodeFloat 1 (1 - floatDigits eps) in eps
 
 {-----------------------------------------------------------------------------
     Vector
